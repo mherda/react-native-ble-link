@@ -1,0 +1,63 @@
+// AGP, Kotlin and the React Native Gradle plugin come from the consuming app's
+// root buildscript classpath.
+
+def getExtOrDefault(name, fallback) {
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : fallback
+}
+
+apply plugin: "com.android.library"
+
+// AGP 9 ships built-in Kotlin; only apply the Kotlin plugin when it's disabled
+// (the RN 0.88 template sets android.builtInKotlin=false) or on AGP <= 8.
+def agpMajor = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize('.')[0].toInteger()
+def builtInKotlin = providers.gradleProperty("android.builtInKotlin").orNull
+if (agpMajor <= 8 || (builtInKotlin != null && !builtInKotlin.toBoolean())) {
+  apply plugin: "org.jetbrains.kotlin.android"
+}
+
+apply plugin: "com.facebook.react"
+
+react {
+  jsRootDir = file("../src")
+  libraryName = "RNBleLinkSpec"
+  codegenJavaPackageName = "com.blelink"
+}
+
+android {
+  namespace "com.blelink"
+
+  compileSdkVersion getExtOrDefault("compileSdkVersion", 36)
+
+  defaultConfig {
+    minSdkVersion getExtOrDefault("minSdkVersion", 24)
+    targetSdkVersion getExtOrDefault("targetSdkVersion", 36)
+  }
+
+  buildFeatures {
+    buildConfig true
+  }
+
+  buildTypes {
+    release {
+      minifyEnabled false
+    }
+  }
+
+  lintOptions {
+    disable "GradleCompatible"
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_17
+    targetCompatibility JavaVersion.VERSION_17
+  }
+}
+
+repositories {
+  mavenCentral()
+  google()
+}
+
+dependencies {
+  implementation "com.facebook.react:react-android"
+}

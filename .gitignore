@@ -1,0 +1,65 @@
+# Dependencies
+node_modules/
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+.pnp.*
+
+# Build output
+lib/
+*.tsbuildinfo
+coverage/
+
+# npm pack output
+*.tgz
+
+# Android (created when an app builds the library)
+android/build/
+android/.gradle/
+android/.cxx/
+android/.kotlin/
+android/local.properties
+android/generated/
+*.iml
+captures/
+
+# iOS / Xcode
+ios/build/
+ios/generated/
+DerivedData/
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Future example/ app (see TODO.md)
+example/ios/Pods/
+example/ios/build/
+example/android/app/build/
+example/vendor/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.keystore
+!debug.keystore
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+
+# Logs and caches
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.eslintcache
+.metro-health-check*

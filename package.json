@@ -1,0 +1,105 @@
+{
+  "name": "react-native-ble-link",
+  "version": "0.1.0",
+  "description": "Two-way messaging over Bluetooth Low Energy between React Native apps: one device hosts a GATT server, phones nearby connect and talk to it",
+  "keywords": [
+    "react-native",
+    "ios",
+    "android",
+    "bluetooth",
+    "ble",
+    "gatt",
+    "peripheral",
+    "central",
+    "proximity"
+  ],
+  "author": "Marcin Herda",
+  "license": "MIT",
+  "main": "./lib/module/index.js",
+  "types": "./lib/typescript/index.d.ts",
+  "react-native": "./src/index.ts",
+  "source": "./src/index.ts",
+  "files": [
+    "src",
+    "lib",
+    "ios",
+    "android",
+    "BleLink.podspec",
+    "docs",
+    "CHANGELOG.md",
+    "TODO.md",
+    "!**/__tests__",
+    "!android/build",
+    "!android/.gradle",
+    "!android/.cxx",
+    "!ios/build"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "bob build",
+    "prepare": "bob build",
+    "clean": "rm -rf lib android/build android/.gradle android/.cxx",
+    "typecheck": "tsc --noEmit",
+    "test": "jest"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": ">=0.88.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.13",
+    "@types/react": "^19.2.0",
+    "jest": "^29.6.3",
+    "react": "19.3.0",
+    "react-native": "0.88.1",
+    "react-native-builder-bob": "^0.44.0",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.9.3"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>/src"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": [
+        "ts-jest",
+        {
+          "diagnostics": false
+        }
+      ]
+    }
+  },
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "lib",
+    "targets": [
+      [
+        "module",
+        {
+          "esm": true
+        }
+      ],
+      [
+        "typescript",
+        {
+          "project": "tsconfig.build.json"
+        }
+      ]
+    ]
+  },
+  "codegenConfig": {
+    "name": "RNBleLinkSpec",
+    "type": "modules",
+    "jsSrcsDir": "src",
+    "android": {
+      "javaPackageName": "com.blelink"
+    },
+    "ios": {
+      "modulesProvider": {
+        "BleLink": "BleLink"
+      }
+    }
+  }
+}
