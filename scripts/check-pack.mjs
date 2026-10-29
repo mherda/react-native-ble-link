@@ -2,11 +2,19 @@
 // and tests, build output and local clutter are not.
 import { execFileSync } from 'node:child_process';
 
-const [pack] = JSON.parse(
-  execFileSync('npm', ['pack', '--dry-run', '--json', '--ignore-scripts'], {
-    encoding: 'utf8',
-  }),
-);
+// Some npm versions (10.x) still run `prepare` on pack despite
+// --ignore-scripts, and its build log lands on stdout before the JSON. So turn
+// scripts off via the environment too, and parse from the JSON array only.
+const output = execFileSync('npm', ['pack', '--dry-run', '--json', '--ignore-scripts'], {
+  encoding: 'utf8',
+  env: { ...process.env, npm_config_ignore_scripts: 'true' },
+});
+const jsonStart = output.search(/^\[/m);
+if (jsonStart === -1) {
+  console.error('No JSON in `npm pack` output:\n' + output);
+  process.exit(1);
+}
+const [pack] = JSON.parse(output.slice(jsonStart));
 const files = pack.files.map(f => f.path);
 
 const required = [
