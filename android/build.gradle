@@ -19,12 +19,12 @@ apply plugin: "com.facebook.react"
 
 react {
   jsRootDir = file("../src")
-  libraryName = "RNBleLinkSpec"
-  codegenJavaPackageName = "com.blelink"
+  libraryName = "ReactNativeBleLinkSpec"
+  codegenJavaPackageName = "com.mherda.blelink"
 }
 
 android {
-  namespace "com.blelink"
+  namespace "com.mherda.blelink"
 
   compileSdkVersion getExtOrDefault("compileSdkVersion", 36)
 

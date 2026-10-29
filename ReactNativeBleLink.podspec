@@ -3,7 +3,7 @@ require "json"
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 
 Pod::Spec.new do |s|
-  s.name         = "BleLink"
+  s.name         = "ReactNativeBleLink"
   s.version      = package["version"]
   s.summary      = package["description"]
   s.homepage     = package["homepage"]
@@ -14,7 +14,7 @@ Pod::Spec.new do |s|
   s.source       = { :git => package.dig("repository", "url").sub(/^git\+/, ""), :tag => "#{s.version}" }
 
   s.source_files = "ios/**/*.{h,m,mm,swift}"
-  # BleLink.h pulls in C++ codegen headers; keep it out of the umbrella header
+  # ReactNativeBleLink.h pulls in C++ codegen headers; keep it out of the umbrella header
   # so the Swift half of the module can still be compiled.
   s.private_header_files = "ios/**/*.h"
   s.swift_version = "5.0"

@@ -1,9 +1,9 @@
-#import "BleLink.h"
+#import "ReactNativeBleLink.h"
 
-#if __has_include("BleLink/BleLink-Swift.h")
-#import "BleLink/BleLink-Swift.h"
+#if __has_include("ReactNativeBleLink/ReactNativeBleLink-Swift.h")
+#import "ReactNativeBleLink/ReactNativeBleLink-Swift.h"
 #else
-#import "BleLink-Swift.h"
+#import "ReactNativeBleLink-Swift.h"
 #endif
 
 using RejectBlock = void (^)(NSString *, NSString *);
@@ -26,11 +26,11 @@ static NSDictionary<NSString *, NSString *> *uuidsToDictionary(JS::NativeBleLink
   };
 }
 
-@implementation BleLink {
-  BleLinkCore *_core;
+@implementation ReactNativeBleLink {
+  ReactNativeBleLinkCore *_core;
 }
 
-RCT_EXPORT_MODULE(BleLink)
+RCT_EXPORT_MODULE(ReactNativeBleLink)
 
 + (BOOL)requiresMainQueueSetup
 {
@@ -40,8 +40,8 @@ RCT_EXPORT_MODULE(BleLink)
 - (instancetype)init
 {
   if (self = [super init]) {
-    _core = [BleLinkCore new];
-    __weak BleLink *weakSelf = self;
+    _core = [ReactNativeBleLinkCore new];
+    __weak ReactNativeBleLink *weakSelf = self;
     _core.onEvent = ^(NSString *type, NSString *payload) {
       [weakSelf emitOnEvent:@{@"type" : type, @"payload" : payload}];
     };

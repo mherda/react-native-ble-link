@@ -219,6 +219,7 @@ describe('hub ↔ phone link', () => {
     const conn = await connect(ctx.phoneA);
     await conn.readState();
     expect(await errorCode(conn.request('nope', null))).toBe('UNKNOWN_TYPE');
+    await expect(conn.request('nope', null)).rejects.toThrow('Unknown request type "nope"');
     expect(await errorCode(conn.request('boom', null))).toBe('HANDLER_ERROR');
   });
 

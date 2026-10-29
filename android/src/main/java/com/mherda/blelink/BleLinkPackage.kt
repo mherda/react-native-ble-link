@@ -1,4 +1,4 @@
-package com.blelink
+package com.mherda.blelink
 
 import com.facebook.react.BaseReactPackage
 import com.facebook.react.bridge.NativeModule

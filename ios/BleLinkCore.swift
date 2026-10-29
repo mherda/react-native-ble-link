@@ -1,14 +1,14 @@
 import CoreBluetooth
 import Foundation
 
-/// Entry point used by BleLink.mm. Owns the CoreBluetooth queue and creates the
+/// Entry point used by ReactNativeBleLink.mm. Owns the CoreBluetooth queue and creates the
 /// peripheral / central roles lazily, so the hub app never instantiates a
 /// CBCentralManager (and vice versa) unless it actually uses that role.
-@objc(BleLinkCore)
+@objc(ReactNativeBleLinkCore)
 public final class BleLinkCore: NSObject {
   @objc public var onEvent: ((String, String) -> Void)?
 
-  private let queue = DispatchQueue(label: "com.blelink.corebluetooth")
+  private let queue = DispatchQueue(label: "com.mherda.blelink.corebluetooth")
   private var peripheralRole: BleLinkPeripheral?
   private var centralRole: BleLinkCentral?
 

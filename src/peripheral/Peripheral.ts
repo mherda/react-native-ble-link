@@ -306,8 +306,10 @@ export class Peripheral<S extends AppState = AppState> extends Emitter<Periphera
     }
 
     const entry = this.handlers.get(request.type);
-    if (!entry) reject('UNKNOWN_TYPE');
-    const { handler, options } = entry!;
+    if (!entry) {
+      throw new BleLinkError('UNKNOWN_TYPE', `Unknown request type "${request.type}"`);
+    }
+    const { handler, options } = entry;
     if (options.requireSession !== false) {
       reject(this.sessions.check(session, client));
     }
@@ -346,6 +348,5 @@ const messages: Partial<Record<BleLinkErrorCode, string>> = {
   SESSION_EXPIRED: 'The hub has moved on to a different session',
   SESSION_BUSY: 'Another device is using this hub',
   NOT_CLAIMED: 'Claim the session first',
-  UNKNOWN_TYPE: 'Unknown request type',
   NOT_CLAIMABLE: 'This session cannot be claimed',
 };

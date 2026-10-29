@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "BLE Link",
+    "slug": "react-native-ble-link-example",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "com.mherda.blelink.example",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.mherda.blelink.example",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": [
+      [
+        "react-native-ble-link",
+        {
+          "roles": ["central", "peripheral"],
+          "bluetoothAlwaysPermission": "BLE Link uses Bluetooth to talk to devices next to you."
+        }
+      ]
+    ]
+  }
+}

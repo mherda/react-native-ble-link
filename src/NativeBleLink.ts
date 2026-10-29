@@ -61,4 +61,4 @@ export interface Spec extends TurboModule {
   readonly onEvent: CodegenTypes.EventEmitter<NativeEvent>;
 }
 
-export default TurboModuleRegistry.getEnforcing<Spec>('BleLink');
+export default TurboModuleRegistry.getEnforcing<Spec>('ReactNativeBleLink');

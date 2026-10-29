@@ -1,4 +1,4 @@
-package com.blelink
+package com.mherda.blelink
 
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
@@ -188,7 +188,7 @@ class BleLinkModule(reactContext: ReactApplicationContext) : NativeBleLinkSpec(r
   }
 
   companion object {
-    const val NAME = "BleLink"
+    const val NAME = "ReactNativeBleLink"
     private const val REQUEST_ENABLE_BT = 0xB1E
   }
 }

@@ -1,4 +1,4 @@
-package com.blelink
+package com.mherda.blelink
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice

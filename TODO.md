@@ -5,27 +5,25 @@ What's still needed, roughly in priority order. Everything here is about the lib
 ## Before the first public release
 
 - [x] **Repository and metadata.** `repository`, `homepage` and `bugs` are in `package.json`, and the podspec reads them.
-- [ ] **Native names that won't collide.**
-  - The pod is called `BleLink` and the Android package is `com.blelink`. Both are generic enough to clash with another library.
-  - Rename them to something like `ReactNativeBleLink` and `com.<owner>.blelink`. That's a breaking change, so do it before 1.0.
+- [x] **Native names that won't collide.** These now use `ReactNativeBleLink`: the pod, the TurboModule, the Objective-C classes and the Codegen library. The Android package is `com.mherda.blelink`.
+  - Left as is: the Codegen spec name `NativeBleLink`, which comes from the file name `src/NativeBleLink.ts` (the Jest mock path depends on it). Rename it if a clash ever shows up.
 - [ ] **Test Android as the hub on real devices.** So far: iOS ↔ iOS, and an Android phone ↔ iOS hub. Still to test:
   - an Android hub with iPhone and Android phones;
   - several vendors (Samsung, Pixel, a budget tablet).
 - [ ] **Supported React Native range.**
   - The peer dependency says `>=0.88.0` because that's the only version tested. The API used (`CodegenTypes.EventEmitter` TurboModule events) exists from about 0.80, so test 0.80–0.87 and widen the range.
   - Decide whether the old architecture will ever be supported. Probably not: document "New Architecture only".
-- [ ] **CI.** Typecheck, unit tests, `bob build`, `npm pack` contents, plus compiling iOS and Android in an example app.
-- [ ] **Expo support.** Many React Native apps use Expo, so this matters for adoption:
-  - **A config plugin** (`app.plugin.js`, `"plugins": ["react-native-ble-link"]` in `app.json`). It should add `NSBluetoothAlwaysUsageDescription`, and the Android permissions for the roles chosen with an option such as `{ roles: ['central', 'peripheral'] }`, including `neverForLocation` and `maxSdkVersion`. It could also add the `bluetooth-central` / `bluetooth-peripheral` background modes once those are supported.
-  - **Test with a development build** (`expo prebuild` + `expo run:ios|android`) on the current Expo SDK, and confirm autolinking and Codegen work without manual steps.
-  - **Plugin options,** following the same pattern as `react-native-ble-manager`'s:
-    - `neverForLocation` (default `true` for us, since we never derive location);
-    - `isBleRequired`, which sets `<uses-feature android:required>` and so whether the Play Store hides the app on devices without BLE;
-    - a custom iOS permission text.
-  - Add `app.plugin.js` to `files` in `package.json`.
-  - **Docs:** an Expo install section in the README, and a note that Expo Go can't load it.
-  - `react-native-ble-manager`'s plugin is a reference for how to structure this.
-- [ ] **Example app inside the repo** (`example/`, the usual layout for RN libraries), so contributors can run both roles without the separate demo apps.
+- [x] **CI** (`.github/workflows/ci.yml`): typecheck, unit tests, `bob build` and the `npm pack` contents (`scripts/check-pack.mjs`) on Node 22 and 24.
+  - Still to do: compile iOS and Android in CI, once the example app exists.
+- [x] **Expo support.**
+  - A config plugin (`app.plugin.js` → `plugin/withBleLink.js`) with the options `roles`, `bluetoothAlwaysPermission`, `neverForLocation` and `isBleRequired`, plus unit tests.
+  - An Expo install section in the README.
+  - Verified with a development build on Expo SDK 58 on Android: prebuild output, autolinking and Codegen.
+  - Still to do:
+    - an iOS development build of the example on a device;
+    - adding the `bluetooth-central` / `bluetooth-peripheral` background modes to the plugin, once those are supported.
+- [x] **Example app inside the repo** ([`example/`](./example/README.md)): one Expo app with both roles.
+  - Still to do: build it in CI (Android, and iOS on a macOS runner).
 - [x] **Troubleshooting page:** [`docs/troubleshooting.md`](./docs/troubleshooting.md). Add to it as real-world reports come in.
 - [ ] **Lint and format config** (ESLint, Prettier, ktlint, SwiftFormat).
 - [ ] **Release process,** such as changesets or release-it, with a changelog generated from it. Publish with npm provenance.

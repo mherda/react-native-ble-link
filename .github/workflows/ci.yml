@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  js:
+    name: Typecheck, test, build (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # React Native 0.88 supports ^22.13 and ^24.3.
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      # `prepare` runs `bob build`, so this also builds lib/.
+      - run: npm ci
+
+      - run: npm run typecheck
+      - run: npm test -- --ci
+      - run: npm run build
+
+      - name: Check published files
+        run: node scripts/check-pack.mjs
+
+  example:
+    name: Example app and Expo plugin
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            example/package-lock.json
+
+      # The root install builds lib/, which the example's types come from.
+      - run: npm ci
+      - run: npm ci
+        working-directory: example
+
+      - run: npx tsc --noEmit
+        working-directory: example
+
+      # Runs the config plugin for real and checks what it wrote.
+      - name: Expo prebuild (Android)
+        working-directory: example
+        run: |
+          npx expo prebuild --platform android --no-install
+          manifest=android/app/src/main/AndroidManifest.xml
+          for p in BLUETOOTH_SCAN BLUETOOTH_CONNECT BLUETOOTH_ADVERTISE; do
+            grep -q "android.permission.$p" "$manifest" || { echo "missing $p"; exit 1; }
+          done
+          grep -q 'android:usesPermissionFlags="neverForLocation"' "$manifest"
+          echo "Plugin output OK"

@@ -66,7 +66,7 @@ createPeripheral({ hubId: 'DESK-1' })            createCentral()
 - **Native code is a thin byte pipe.** Framing, messages, sessions and claims are in TypeScript and shared by both platforms, so they can be tested without devices (`FakeRadio`).
 - **Content-agnostic.** You define the message types, payloads and hub state. The library just moves them.
 - **New Architecture only.** It's a TurboModule (React Native ≥ 0.88; see [TODO](./TODO.md) about older versions).
-- **Expo:** it should work in a development build (`expo prebuild`) if you add the permissions below yourself, through `app.json`. That's untested so far. It can't work in Expo Go, which only contains Expo's own native modules. A config plugin is [planned](./TODO.md).
+- **Expo:** supported in development builds, with a config plugin that sets up the permissions ([Expo](#expo)). It can't work in Expo Go, which only contains Expo's own native modules.
 
 > **Status: 0.x, early.** Tested on real devices iOS ↔ iOS and Android (phone) ↔ iOS (hub). See [TODO.md](./TODO.md) for what's still missing.
 
@@ -82,6 +82,7 @@ createPeripheral({ hubId: 'DESK-1' })            createCentral()
 - [Testing without devices](#testing-without-devices)
 - [Limits and platform notes](#limits-and-platform-notes)
 - [Security](#security)
+- [Example app](./example/README.md): both roles in one Expo app
 - More docs: [use cases](./docs/use-cases.md) · [troubleshooting](./docs/troubleshooting.md) · [wire protocol](./docs/protocol.md) · [TODO / roadmap](./TODO.md)
 
 ---
@@ -94,6 +95,8 @@ cd ios && pod install
 ```
 
 Autolinking picks up the native code. There's no extra setup in `MainApplication` or `AppDelegate`.
+
+Using Expo? Skip the two manual sections below and see [Expo](#expo).
 
 ### iOS: `Info.plist`
 
@@ -134,6 +137,35 @@ const granted = await requestPermissions('central'); // or 'peripheral'
 ```
 
 On iOS, `requestPermissions` returns `true` right away. iOS prompts on first use instead.
+
+### Expo
+
+This works in an Expo **development build** (SDK 58+), not in Expo Go. Install it, then add the config plugin to `app.json`:
+
+```sh
+npx expo install react-native-ble-link
+```
+
+```json
+{
+  "expo": {
+    "plugins": [
+      ["react-native-ble-link", { "roles": ["central"] }]
+    ]
+  }
+}
+```
+
+Then build with `npx expo run:ios` / `npx expo run:android`, or `eas build`. The plugin adds the `Info.plist` text and the Android permissions shown above, so skip those two sections. You still need `requestPermissions()` at runtime.
+
+| Option | Default | |
+|---|---|---|
+| `roles` | `["central", "peripheral"]` | Which roles the app uses. Only those roles' Android permissions are added. |
+| `bluetoothAlwaysPermission` | `"Allow $(PRODUCT_NAME) to connect to nearby devices using Bluetooth."` | iOS permission text. An existing `NSBluetoothAlwaysUsageDescription` is kept. `false` adds nothing. |
+| `neverForLocation` | `true` | Declares that scans aren't used for location. Android 12+ then needs no location permission, and older versions only need it to scan. Set it to `false` if your app does derive location from Bluetooth. |
+| `isBleRequired` | `false` | `true` marks Bluetooth LE as required, so Google Play hides the app on devices without it. |
+
+The [example app](./example/README.md) is an Expo app that uses the plugin.
 
 ---
 

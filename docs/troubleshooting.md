@@ -41,6 +41,13 @@ This is expected. The hub ID is in the **scan response**, which arrives a little
 - **The handler is slow.** The default request timeout is 10 s. If your handler calls a slow backend, pass `{ timeoutMs }` to `request()` or reply quickly and send the result later as an event.
 - **The handler never returns.** An unresolved promise in a handler causes a `TIMEOUT` on the phone. Make sure every code path returns or throws.
 
+## `UNKNOWN_TYPE: Unknown request type "…"`
+
+The hub received the request, and it shows up in the hub's `received` log, but it has no handler registered for that type. Check:
+- **The spelling.** The type must match exactly what the hub passes to `handle()`.
+- **When the handler is registered.** Apps often register handlers per screen, e.g. in a screen's `useEffect`, so the hub only answers while that screen is showing.
+- **That you're talking to the hub you think.** All hubs with the same UUIDs look alike to the phone. Check the hub ID and `displayName` in the state.
+
 ## Unexpected `SESSION_EXPIRED` or `SESSION_BUSY`
 
 - **`SESSION_EXPIRED`:** the phone's session is older than the hub's.
@@ -58,6 +65,15 @@ This is expected. The hub ID is in the **scan response**, which arrives a little
 - **Android:** check that the permissions are in the `main` manifest, not only a `debug` one. With `minSdkVersion` or `maxSdkVersion` changes, recheck which permissions apply.
 - **iOS:** check the usage description is in the `Info.plist` the Release configuration actually uses.
 - Make sure both sides are on the same version of this library. A hub and phone on different protocol versions fail with `UNSUPPORTED_VERSION`.
+
+## The build fails after updating the library
+
+- **iOS:** run `pod install` again.
+- **Android, with CMake errors naming a Codegen library that no longer exists:** React Native's Gradle plugin caches the autolinking setup and only refreshes it when the app's lockfile changes. That doesn't happen when the library comes from a local `file:` path. Delete the cache and rebuild:
+  ```sh
+  rm -rf android/build/generated/autolinking android/app/build/generated/autolinking android/app/.cxx
+  ```
+- **Android, Kotlin errors like `Cannot access '…': it is internal in file`:** a stale incremental build. Run `./gradlew :react-native-ble-link:clean` and rebuild.
 
 ## Android phone sees an old layout after a hub update
 
