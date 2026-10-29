@@ -4,7 +4,7 @@ What's still needed, roughly in priority order. Everything here is about the lib
 
 ## Before the first public release
 
-- [ ] **Repository and metadata.** Add `repository`, `homepage` and `bugs` to `package.json`. The podspec reads them, and `s.source` currently falls back to a placeholder URL.
+- [x] **Repository and metadata.** `repository`, `homepage` and `bugs` are in `package.json`, and the podspec reads them.
 - [ ] **Native names that won't collide.**
   - The pod is called `BleLink` and the Android package is `com.blelink`. Both are generic enough to clash with another library.
   - Rename them to something like `ReactNativeBleLink` and `com.<owner>.blelink`. That's a breaking change, so do it before 1.0.
@@ -26,13 +26,7 @@ What's still needed, roughly in priority order. Everything here is about the lib
   - **Docs:** an Expo install section in the README, and a note that Expo Go can't load it.
   - `react-native-ble-manager`'s plugin is a reference for how to structure this.
 - [ ] **Example app inside the repo** (`example/`, the usual layout for RN libraries), so contributors can run both roles without the separate demo apps.
-- [ ] **Troubleshooting page** (`docs/troubleshooting.md`) covering:
-  - permissions denied, or granted but scans still returning nothing (Android location services switched off on ≤ 11);
-  - Android scan throttling;
-  - a stale GATT cache;
-  - an iOS hub ID that only appears after the scan response;
-  - "works in Debug, not in Release" (Info.plist and manifest differences);
-  - simulators and emulators having no Bluetooth.
+- [x] **Troubleshooting page:** [`docs/troubleshooting.md`](./docs/troubleshooting.md). Add to it as real-world reports come in.
 - [ ] **Lint and format config** (ESLint, Prettier, ktlint, SwiftFormat).
 - [ ] **Release process,** such as changesets or release-it, with a changelog generated from it. Publish with npm provenance.
 
@@ -49,10 +43,11 @@ What's still needed, roughly in priority order. Everything here is about the lib
 - [ ] **Faster Android connections:** request `CONNECTION_PRIORITY_HIGH` during an exchange, and check the MTU request timing.
 - [ ] **Android GATT cache.** When a hub's GATT layout changes (a new library version), Android phones may use a cached service table. Use the Service Changed characteristic, or `BluetoothGatt.refresh()` via reflection, as a fallback.
 - [ ] **Deprecation warning** in `CentralController.kt` (`connectGatt` overload). Move to the current API on newer SDK levels.
-- [ ] **Request ID collisions.** `randomId(4)` per pending request is fine in practice. Switch to a per-connection counter to make it deterministic.
-- [ ] **"Turn on Bluetooth" helper.**
+- [x] **Request ID collisions.** Request IDs are now a per-connection counter, so two pending requests can't share one.
+- [x] **"Turn on Bluetooth" helper.**
   - Android: `enableBluetooth()` shows the system dialog (`ACTION_REQUEST_ENABLE`) and resolves with the user's choice.
-  - iOS has no API for this. Document showing your own prompt when `getBluetoothState()` is `poweredOff`, or the `CBCentralManagerOptionShowPowerAlertKey` system alert.
+  - iOS has no API for this, so it reports whether Bluetooth is on.
+  - Still to do: test the dialog on a real device, and consider exposing iOS's `CBCentralManagerOptionShowPowerAlertKey` system alert as an option.
 - [ ] **Native unit tests** (XCTest / JUnit) for the parts that can be tested without a radio: base64, event payloads, operation queues.
 
 ## Security
@@ -83,7 +78,7 @@ The link is currently plaintext and unauthenticated (see README → Security). O
 - [ ] **Scan options:** scan mode (low latency vs low power), raw advertisement data, TX power for better distance estimates, filtering by hub ID in native code. On Android, also `matchMode`, `callbackType` and `reportDelay` (batched results save battery while waiting in the background).
 - [ ] **Signal strength while connected:** `conn.readRssi()` and an optional `rssi` event every N seconds. Use it to detect "the user walked away" and disconnect or release a claim, or to show a "move closer" hint. Possibly an auto-release policy on the hub.
 - [ ] **Long range (LE Coded PHY).** About 4× the range on Bluetooth 5 hardware: extended advertising on the hub, a `phy` option on scan and connect. Android only; iOS doesn't expose it. Useful for car parks, warehouses and large venues. The opposite (LE 2M PHY) gives faster transfers.
-- [ ] **Introspection on `Central`:** `connections`, `isScanning`, and `getConnection(deviceId)`, so an app can recover after a screen remounts instead of keeping its own bookkeeping.
+- [x] **Introspection on `Central`:** `connections`, `isScanning`, and `getConnection(deviceId)`, so an app can recover after a screen remounts instead of keeping its own bookkeeping.
 - [ ] **Android Companion Device Manager (client side, optional).** A system dialog pairs the phone with a hub once. After that, the app can find it without scan or location permission, and Android 12+ can wake the app when the hub comes into range (`CompanionDeviceService`). This is the closest Android gets to background "arriving at the hub" detection.
 - [ ] **Several services per app** (one app acting as two kinds of hub), and several `Peripheral` instances.
 - [ ] **Debug logging hook and metrics** (connect time, MTU, retries, frame counts), off by default.

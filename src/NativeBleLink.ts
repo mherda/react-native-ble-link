@@ -29,6 +29,8 @@ export interface Spec extends TurboModule {
   // Shared
   getBluetoothState(): Promise<string>;
   isPeripheralSupported(): Promise<boolean>;
+  /** Android: system "turn on Bluetooth" dialog. iOS: can't prompt, reports state only. */
+  enableBluetooth(): Promise<boolean>;
 
   // Peripheral (hub)
   peripheralStart(

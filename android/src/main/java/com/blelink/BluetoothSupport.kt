@@ -20,6 +20,8 @@ internal object Errors {
   const val NOT_FOUND = "E_NOT_FOUND"
   const val GATT = "E_GATT"
   const val ADVERTISE = "E_ADVERTISE"
+  const val NO_ACTIVITY = "E_NO_ACTIVITY"
+  const val BUSY = "E_BUSY"
 }
 
 internal val CCCD_UUID: UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")

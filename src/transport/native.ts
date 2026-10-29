@@ -70,6 +70,16 @@ export function getBluetoothState(): Promise<BluetoothState> {
   return NativeBleLink.getBluetoothState() as Promise<BluetoothState>;
 }
 
+/**
+ * Android: shows the system "turn on Bluetooth?" dialog if it's off, and
+ * resolves with whether the user agreed. `onBluetoothStateChange` reports
+ * `poweredOn` shortly after. iOS can't do this: it resolves with whether
+ * Bluetooth is already on, so show your own prompt when it isn't.
+ */
+export function enableBluetooth(): Promise<boolean> {
+  return call(NativeBleLink.enableBluetooth());
+}
+
 export function isPeripheralSupported(): Promise<boolean> {
   return NativeBleLink.isPeripheralSupported();
 }

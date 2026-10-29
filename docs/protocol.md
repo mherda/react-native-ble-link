@@ -67,7 +67,7 @@ Every reassembled message is a JSON object with `v` (protocol version, currently
 {
   "v": 1,
   "kind": "req",
-  "id": "a1b2c3d4",
+  "id": "7",
   "type": "checkin",
   "session": "9b2e…",
   "client": "5f0c…",
@@ -77,7 +77,7 @@ Every reassembled message is a JSON object with `v` (protocol version, currently
 
 | Field | |
 |---|---|
-| `id` | Random string, unique per pending request on this connection. The reply echoes it in `re`. |
+| `id` | String, unique among the pending requests on this connection. The reply echoes it in `re`. This library sends a counter (`"1"`, `"2"`, …) that restarts with each connection. Hubs must treat it as opaque. |
 | `type` | Request type. `link.*` and `session.*` are reserved. |
 | `session` | Session ID from the last state the phone read, or `null` |
 | `client` | The phone's client token: a random string that stays the same across reconnects. Claims belong to it. |
@@ -86,8 +86,8 @@ Every reassembled message is a JSON object with `v` (protocol version, currently
 **Response (hub → phone)**, exactly one per request:
 
 ```json
-{ "v": 1, "kind": "res", "re": "a1b2c3d4", "ok": true, "body": { "welcome": "Hi Anna" } }
-{ "v": 1, "kind": "res", "re": "a1b2c3d4", "ok": false, "error": { "code": "SESSION_EXPIRED", "message": "…" } }
+{ "v": 1, "kind": "res", "re": "7", "ok": true, "body": { "welcome": "Hi Anna" } }
+{ "v": 1, "kind": "res", "re": "7", "ok": false, "error": { "code": "SESSION_EXPIRED", "message": "…" } }
 ```
 
 **Event (hub → phone)**, with no reply:

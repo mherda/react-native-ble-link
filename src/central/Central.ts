@@ -61,7 +61,7 @@ type CentralEvents = {
 
 export class Central extends Emitter<CentralEvents> {
   private readonly uuids: GattUuids;
-  private readonly connections = new Map<string, Connection>();
+  private readonly byDevice = new Map<string, Connection>();
   private readonly scanListeners = new Set<(result: ScanResult) => void>();
   private unsubscribe: (() => void) | null = null;
   private scanning = false;
@@ -84,6 +84,20 @@ export class Central extends Emitter<CentralEvents> {
   newClientToken(): string {
     this.token = randomId(16);
     return this.token;
+  }
+
+  /** Open connections, e.g. to pick one up again after a screen remounts. */
+  get connections(): Connection[] {
+    return [...this.byDevice.values()];
+  }
+
+  getConnection(deviceId: string): Connection | undefined {
+    return this.byDevice.get(deviceId);
+  }
+
+  /** Whether the radio is scanning. Connecting pauses any scan. */
+  get isScanning(): boolean {
+    return this.scanning;
   }
 
   /** Scans for hubs. Returns a function that stops the scan. */
@@ -120,7 +134,7 @@ export class Central extends Emitter<CentralEvents> {
   }
 
   async connect(deviceId: string, options: ConnectOptions = {}): Promise<Connection> {
-    const existing = this.connections.get(deviceId);
+    const existing = this.byDevice.get(deviceId);
     if (existing?.isConnected) return existing;
 
     this.listen();
@@ -143,11 +157,11 @@ export class Central extends Emitter<CentralEvents> {
           () => this.token,
           maxWriteLength,
         );
-        this.connections.set(deviceId, connection);
+        this.byDevice.set(deviceId, connection);
         connection.on('received', message => this.fire('received', message, deviceId));
         connection.on('disconnected', () => {
-          if (this.connections.get(deviceId) === connection) {
-            this.connections.delete(deviceId);
+          if (this.byDevice.get(deviceId) === connection) {
+            this.byDevice.delete(deviceId);
           }
         });
         return connection;
@@ -205,7 +219,7 @@ export class Central extends Emitter<CentralEvents> {
   async destroy(): Promise<void> {
     this.scanListeners.clear();
     await this.stopScanIfIdle();
-    await Promise.all([...this.connections.values()].map(c => c.disconnect()));
+    await Promise.all([...this.byDevice.values()].map(c => c.disconnect()));
     this.unsubscribe?.();
     this.unsubscribe = null;
   }
@@ -246,10 +260,10 @@ export class Central extends Emitter<CentralEvents> {
         this.scanListeners.forEach(listener => listener(event));
         break;
       case 'notification':
-        this.connections.get(event.deviceId)?.receiveFrame(event.value);
+        this.byDevice.get(event.deviceId)?.receiveFrame(event.value);
         break;
       case 'disconnected':
-        this.connections.get(event.deviceId)?.close(event.error);
+        this.byDevice.get(event.deviceId)?.close(event.error);
         break;
     }
   }

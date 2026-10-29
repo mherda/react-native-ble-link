@@ -40,6 +40,7 @@ export { BleLinkError, isBleLinkError } from './errors';
 export type { BleLinkErrorCode } from './errors';
 export { DEFAULT_UUIDS, PROTOCOL_VERSION } from './constants';
 export {
+  enableBluetooth,
   getBluetoothState,
   isPeripheralSupported,
   onBluetoothStateChange,

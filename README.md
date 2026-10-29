@@ -82,7 +82,7 @@ createPeripheral({ hubId: 'DESK-1' })            createCentral()
 - [Testing without devices](#testing-without-devices)
 - [Limits and platform notes](#limits-and-platform-notes)
 - [Security](#security)
-- More docs: [use cases](./docs/use-cases.md) · [wire protocol](./docs/protocol.md) · [TODO / roadmap](./TODO.md)
+- More docs: [use cases](./docs/use-cases.md) · [troubleshooting](./docs/troubleshooting.md) · [wire protocol](./docs/protocol.md) · [TODO / roadmap](./TODO.md)
 
 ---
 
@@ -309,6 +309,9 @@ Creates the phone side. Returns `Central`. Options: `uuids?`, `transport?`.
 | `scan({ onHubs, onError?, minRssi? }): () => void` | Calls `onHubs(NearbyHub[])` every 500 ms with hubs sorted by signal, strongest first. Hubs not seen for 5 s drop out. Returns a function that stops the scan. |
 | `connect(deviceId, { timeoutMs?, retries? }): Promise<Connection>` | Defaults: 8 s timeout, 1 retry. Stops scanning while connecting. |
 | `reconnect({ hubId, deviceIdHint?, scanTimeoutMs? }): Promise<Connection>` | Reconnects to a hub seen before. Tries `deviceIdHint` first, then rescans for `hubId`. Useful after a deliberate disconnect. |
+| `connections: Connection[]` | Open connections. Handy for picking one up again after a screen remounts. |
+| `getConnection(deviceId): Connection \| undefined` | The open connection to that device, if any |
+| `isScanning: boolean` | Whether the radio is scanning. Connecting pauses any scan. |
 | `clientToken: string` | Random ID sent with every request; claims belong to it |
 | `newClientToken(): string` | Start a fresh identity |
 | `destroy(): Promise<void>` | Stops scanning and disconnects everything |
@@ -338,6 +341,7 @@ Creates the phone side. Returns `Central`. Options: `uuids?`, `transport?`.
 | `requestPermissions(role)` / `checkPermissions(role)` | Android runtime permissions for `'central'` or `'peripheral'`. Return `true` on iOS. |
 | `getBluetoothState()` | `'poweredOn' \| 'poweredOff' \| 'unauthorized' \| 'unsupported' \| 'resetting' \| 'unknown'` |
 | `onBluetoothStateChange(listener): () => void` | |
+| `enableBluetooth(): Promise<boolean>` | **Android:** if Bluetooth is off, shows the system "Turn on Bluetooth?" dialog and resolves with the user's answer. On Android 12+ it needs the `BLUETOOTH_CONNECT` permission first. **iOS:** apps can't turn Bluetooth on, so it resolves with whether it's already on. Show your own message pointing to Settings or Control Centre when it isn't. |
 | `isPeripheralSupported()` | `false` on Android devices whose chip can't advertise. Always `true` on iOS. |
 | `advertisedHubId(scanResult)` | Low-level: extracts the hub ID from a raw scan result |
 | `DEFAULT_UUIDS`, `PROTOCOL_VERSION` | |
@@ -409,6 +413,7 @@ jest.mock('react-native-ble-link/src/NativeBleLink', () => ({
   default: {
     getBluetoothState: jest.fn(async () => 'poweredOn'),
     isPeripheralSupported: jest.fn(async () => true),
+    enableBluetooth: jest.fn(async () => true),
     onEvent: jest.fn(() => ({ remove: jest.fn() })),
     // …other methods as jest.fn()
   },

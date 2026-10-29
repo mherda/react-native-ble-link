@@ -47,6 +47,12 @@ public final class BleLinkCore: NSObject {
     }
   }
 
+  /// iOS has no API to turn Bluetooth on, so this only reports whether it is on.
+  @objc(enableBluetooth:reject:)
+  public func enableBluetooth(_ resolve: @escaping Resolve, reject: @escaping Reject) {
+    getBluetoothState({ state in resolve((state as? String) == "poweredOn") }, reject: reject)
+  }
+
   @objc(isPeripheralSupported:reject:)
   public func isPeripheralSupported(_ resolve: @escaping Resolve, reject: @escaping Reject) {
     resolve(true)

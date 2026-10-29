@@ -1,5 +1,6 @@
 package com.blelink
 
+import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -9,6 +10,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
 import com.facebook.react.bridge.Arguments
+import com.facebook.react.bridge.BaseActivityEventListener
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReadableMap
@@ -61,6 +63,55 @@ class BleLinkModule(reactContext: ReactApplicationContext) : NativeBleLinkSpec(r
     ensureStateReceiver()
     val adapter = bluetooth.adapter
     promise.resolve(adapter != null && adapter.isMultipleAdvertisementSupported)
+  }
+
+  private var enablePromise: Promise? = null
+
+  private val enableResultListener = object : BaseActivityEventListener() {
+    override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, data: Intent?) {
+      if (requestCode != REQUEST_ENABLE_BT) return
+      enablePromise?.resolve(resultCode == Activity.RESULT_OK)
+      enablePromise = null
+    }
+  }
+
+  init {
+    reactContext.addActivityEventListener(enableResultListener)
+  }
+
+  override fun enableBluetooth(promise: Promise) {
+    ensureStateReceiver()
+    val adapter = bluetooth.adapter
+    if (adapter == null) {
+      promise.resolve(false)
+      return
+    }
+    if (adapter.isEnabled) {
+      promise.resolve(true)
+      return
+    }
+    // The system dialog needs BLUETOOTH_CONNECT on Android 12+.
+    if (!bluetooth.canConnect()) {
+      promise.reject(Errors.UNAUTHORIZED, "BLUETOOTH_CONNECT permission not granted")
+      return
+    }
+    val activity = reactApplicationContext.currentActivity
+    if (activity == null) {
+      promise.reject(Errors.NO_ACTIVITY, "No foreground activity to show the dialog from")
+      return
+    }
+    if (enablePromise != null) {
+      promise.reject(Errors.BUSY, "The Bluetooth dialog is already showing")
+      return
+    }
+    enablePromise = promise
+    try {
+      @Suppress("MissingPermission")
+      activity.startActivityForResult(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE), REQUEST_ENABLE_BT)
+    } catch (e: Exception) {
+      enablePromise = null
+      promise.reject(Errors.UNSUPPORTED, "Could not show the Bluetooth dialog: ${e.message}")
+    }
   }
 
   override fun peripheralStart(uuids: ReadableMap, advertisedId: String, info: String, promise: Promise) {
@@ -126,6 +177,9 @@ class BleLinkModule(reactContext: ReactApplicationContext) : NativeBleLinkSpec(r
       }
     }
     stateReceiver = null
+    reactApplicationContext.removeActivityEventListener(enableResultListener)
+    enablePromise?.resolve(false)
+    enablePromise = null
     peripheral.stop(null)
     central.shutdown()
     // Let the queued teardown run before the looper exits.
@@ -135,5 +189,6 @@ class BleLinkModule(reactContext: ReactApplicationContext) : NativeBleLinkSpec(r
 
   companion object {
     const val NAME = "BleLink"
+    private const val REQUEST_ENABLE_BT = 0xB1E
   }
 }

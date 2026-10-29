@@ -79,6 +79,24 @@ describe('hub ↔ phone link', () => {
     });
   });
 
+  it('lists open connections and scan status', async () => {
+    const { phoneA } = ctx;
+    expect(phoneA.isScanning).toBe(false);
+    const stop = phoneA.scan({ onHubs: () => undefined });
+    expect(phoneA.isScanning).toBe(true);
+    stop();
+    expect(phoneA.isScanning).toBe(false);
+
+    const conn = await connect(phoneA);
+    expect(phoneA.isScanning).toBe(false);
+    expect(phoneA.connections).toEqual([conn]);
+    expect(phoneA.getConnection(conn.deviceId)).toBe(conn);
+
+    await conn.disconnect();
+    expect(phoneA.connections).toEqual([]);
+    expect(phoneA.getConnection(conn.deviceId)).toBeUndefined();
+  });
+
   it('check-in: reads location and gets a reply to a long request', async () => {
     ctx.hub.setState(
       { screen: 'location', data: { locationId: 'L-12' } },
@@ -202,6 +220,22 @@ describe('hub ↔ phone link', () => {
     await conn.readState();
     expect(await errorCode(conn.request('nope', null))).toBe('UNKNOWN_TYPE');
     expect(await errorCode(conn.request('boom', null))).toBe('HANDLER_ERROR');
+  });
+
+  it('matches concurrent replies to their requests, including out of order', async () => {
+    ctx.hub.handle(
+      'echo',
+      async ({ n, waitMs }: { n: number; waitMs: number }) => {
+        await new Promise<void>(r => setTimeout(r, waitMs));
+        return { n };
+      },
+      { requireSession: false },
+    );
+    const conn = await connect(ctx.phoneA);
+    const replies = await Promise.all(
+      [30, 0, 15].map((waitMs, n) => conn.request<{ n: number }>('echo', { n, waitMs })),
+    );
+    expect(replies.map(r => r.n)).toEqual([0, 1, 2]);
   });
 
   it('fails pending requests when the link drops', async () => {

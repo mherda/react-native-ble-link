@@ -2,7 +2,7 @@ import { DEFAULT_REQUEST_TIMEOUT_MS, PROTOCOL_VERSION } from '../constants';
 import { Emitter } from '../emitter';
 import { BleLinkError } from '../errors';
 import { MessageChannel } from '../protocol/channel';
-import { decodeJson, randomId } from '../protocol/codec';
+import { decodeJson } from '../protocol/codec';
 import type { ParseResult } from '../protocol/envelope';
 import type { CentralTransport, GattUuids } from '../transport/types';
 import type {
@@ -32,6 +32,8 @@ export class Connection extends Emitter<ConnectionEvents> {
   private readonly pending = new Map<string, PendingRequest>();
   private session: string | null = null;
   private closed = false;
+  /** Request IDs count up per connection, so two pending ones never collide. */
+  private lastRequestId = 0;
 
   constructor(
     readonly deviceId: string,
@@ -95,7 +97,7 @@ export class Connection extends Emitter<ConnectionEvents> {
     if (this.closed) {
       return Promise.reject(new BleLinkError('DISCONNECTED', 'Connection closed'));
     }
-    const id = randomId(4);
+    const id = String(++this.lastRequestId);
     const timeoutMs = options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS;
     return new Promise<T>((resolve, reject) => {
       const timer = setTimeout(() => {

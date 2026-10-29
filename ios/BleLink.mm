@@ -61,6 +61,11 @@ RCT_EXPORT_MODULE(BleLink)
   [_core getBluetoothState:resolve reject:wrapReject(reject)];
 }
 
+- (void)enableBluetooth:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject
+{
+  [_core enableBluetooth:resolve reject:wrapReject(reject)];
+}
+
 - (void)isPeripheralSupported:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject
 {
   [_core isPeripheralSupported:resolve reject:wrapReject(reject)];
